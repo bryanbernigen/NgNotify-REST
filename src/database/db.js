@@ -82,9 +82,67 @@ const login = (params, callback) => {
     })
 }
 
+const getSong = (penyanyi_id, callback) => {
+    client.query('SELECT * FROM songs WHERE penyanyi_id = $1', [penyanyi_id], (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error getting song"})
+        } else {
+            callback(res.rows)
+        }
+    })
+}
+
+const addSong = (params,penyanyi_id, callback) => {
+    client.query('INSERT INTO songs (Judul, audio_path, penyanyi_id) VALUES ($1, $2, $3) RETURNING *', [params["judul"], params["Audio_path"], penyanyi_id], (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error adding song"})
+        } else {
+            callback(res.rows[0])
+        }
+    })
+}
+
+const editSong = (params, penyanyi_id, callback) => {
+    client.query('UPDATE songs SET Judul = $1, audio_path = $2 WHERE penyanyi_id = $3 AND song_id = $4 RETURNING *', [params["judul"], params["Audio_path"], penyanyi_id, params["song_id"]], (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error editing song"})
+        } else {
+            if (res.rows.length > 0) {
+                callback(res.rows[0])
+            }
+            else{
+                callback({message: "Song not found"})
+            }
+        }
+    })
+}
+
+const deleteSong = (params, penyanyi_id, callback) => {
+    client.query('DELETE FROM songs WHERE penyanyi_id = $1 AND song_id = $2 RETURNING *', [penyanyi_id, params["song_id"]], (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error deleting song"})
+        } else {
+            if (res.rows.length > 0) {
+                callback(res.rows[0])
+            }
+            else{
+                callback({message: "Song not found"})
+            }
+        }
+    })
+}
+
 module.exports = {
     getUser,
     register,
-    login
+    login,
+    getSong,
+    addSong,
+    editSong,
+    deleteSong
 }
 

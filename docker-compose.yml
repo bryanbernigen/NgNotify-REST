@@ -8,9 +8,9 @@ services:
       - ./src:/app
       - node_modules:/app/node_modules
     ports:
-      - 7000:7000
+      - 3000:3000
     environment:
-      - PORT=7000
+      - PORT=3000
     command: npm start
     tty: true
 volumes:
