@@ -11,13 +11,13 @@ router.post('/login',checkParams(["emailuser", "password"]),(req, res) => {
             res.status(401).json(data)
         } else {
             user_info = {
-                id: data.id,
+                user_id: data.user_id,
                 username: data.username,
                 email: data.email,
                 name: data.name,
                 isAdmin: data.isAdmin
             }
-            const accessToken = jwt.sign(user_info, process.env.ACCESS_TOKEN_KEY)
+            const accessToken = jwt.sign(user_info, process.env.ACCESS_TOKEN_KEY, {expiresIn: '1h'})
             res.status(200).json({accessToken: accessToken})
         }
     })
