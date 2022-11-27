@@ -13,7 +13,7 @@ router.get('/', checkLogin(), async (req, res) => {
         return
     }
     try {
-        const response = await fetch('http://localhost:8080/webservice/ngnotify', {
+        const response = await fetch('http://localhost:8070/webservice/ngnotify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/xml; charset=utf-8',
@@ -75,7 +75,7 @@ router.post('/update', checkLogin(), checkParams(['creator_id', 'subscriber_id',
     }
 
     try {
-        const response = await fetch('http://localhost:8080/webservice/ngnotify', {
+        const response = await fetch('http://localhost:8070/webservice/ngnotify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/xml; charset=utf-8',

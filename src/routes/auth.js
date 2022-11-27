@@ -1,6 +1,7 @@
 require('dotenv').config({path: process.cwd()+"/.env"})
 const checkParams = require('../middlewares/checkParams')
 const {register, login} = require('../database/db')
+const {cacheDelete} = require('../database/redis')
 const express = require('express')
 let router = express.Router()
 var jwt = require('jsonwebtoken')
@@ -29,6 +30,7 @@ router.post('/register', checkParams(["email", "password", "username", "name"]),
             res.status(400).json(result)
         } else {
             res.status(200).json(result)
+            cacheDelete("singers")
         }
     }
 )})

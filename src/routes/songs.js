@@ -12,7 +12,7 @@ router.get('/',checkLogin(), async (req, res) => {
             if (result.message) {
                 res.status(400).json(result)
             } else {
-                res.status(200).json({songs : result})
+                res.status(200).json({data : result})
             }
         })
     }
@@ -24,7 +24,7 @@ router.post('/add', [checkLogin(), checkParams(["judul", "audio_path"])], async 
                 res.status(400).json(result)
             } else {
                 res.status(200).json({
-                    created: result
+                    data: result
                 })
             }
         })
@@ -37,7 +37,7 @@ router.post('/edit', [checkLogin(), checkParams(["song_id", "judul", "audio_path
                 res.status(400).json(result)
             } else {
                 res.status(200).json({
-                    edited: result
+                    data: result
                 })
             }
         })
@@ -50,20 +50,16 @@ router.post('/delete', [checkLogin(), checkParams(["song_id"])], async (req, res
                 res.status(403).json(result)
             } else {
                 res.status(200).json({
-                    deleted: result
+                    data: result
                 })
             }
         })
     }
 )
 
-router.get('/fetch', [checkLogin()], async (req, res) => {
-        if (req.user.isAdmin == true ){
-            res.status(403).json({message: "You are not allowed to do this"})
-            return
-        }
+router.get('/fetch', [checkParams(["penyanyi_id", "user_id"])], async (req, res) => {
         try {
-            const response = await fetch('http://localhost:8080/webservice/ngnotify', {
+            const response = await fetch('http://localhost:8070/webservice/ngnotify', {
             method: 'POST',
             headers: {
                 'Content-Type': 'text/xml; charset=utf-8',
@@ -75,7 +71,8 @@ router.get('/fetch', [checkLogin()], async (req, res) => {
                     <ser:checkStatus>\
                         <!--Optional:-->\
                         <arg0>laptop bryan</arg0>\
-                        <arg1>1</arg1>\
+                        <arg1>'+ req.body["penyanyi_id"]+'</arg1>\
+                        <arg2>'+req.body["user_id"]+'</arg2>\
                     </ser:checkStatus>\
                     </soapenv:Body>\
                 </soapenv:Envelope>\
@@ -95,30 +92,19 @@ router.get('/fetch', [checkLogin()], async (req, res) => {
             }
         
             var doc = new DOMParser().parseFromString(data, "text/xml");
-            subbed = doc.getElementsByTagName("return")[0].childNodes[0].nodeValue.split(";");
-            var promises = []
-            subbed.forEach((penyanyi_id) => {
-                console.log(penyanyi_id);
-                promises.push(new Promise((resolve, reject) => {
-                    getSong(parseInt(penyanyi_id), (result) => {
-                        if (result.message) {
-                            reject(result)
-                        } else {
-                            console.log(result)
-                            resolve(result)
-                        }
-                    })
-                }))
-            })
-            Promise.all(promises).then((values) => {
-                toreturn = []
-                values.forEach((value) => {
-                    toreturn.push(value[0])
+            subbed = doc.getElementsByTagName("return")[0].childNodes[0].nodeValue
+            if (subbed == "ACCEPTED") {
+                getSong(req.body["penyanyi_id"], (result) => {
+                    if (result.message) {
+                        res.status(400).json(result)
+                    } else {
+                        res.status(200).json({data : result})
+                    }
                 })
-                res.status(200).json({songs : toreturn})
-            }).catch((err) => {
-                res.status(500).json({ message : 'Soap Server Error' })
-            })
+            }
+            else{
+                res.status(500).json({ message : 'Rejected' })
+            }
         } catch (error) {
             res.status(500).json({ message : 'Soap Server Error' })
         }
