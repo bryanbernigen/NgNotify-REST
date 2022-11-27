@@ -46,6 +46,7 @@ const register = (params, callback) => {
                                 console.log(err.stack)
                                 callback({message: "Error registering user"})
                             } else {
+                                delete res.rows[0]["password"]
                                 callback(res.rows[0])
                             }
                         })
@@ -136,6 +137,22 @@ const deleteSong = (params, penyanyi_id, callback) => {
     })
 }
 
+const getSingers = (callback) => {
+    client.query('SELECT * FROM users WHERE "isAdmin" = false', (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error getting singers"})
+        } else {
+            if (res.rows.length > 0) {
+                callback(res.rows)
+            }
+            else{
+                callback({message: "No singers found"})
+            }
+        }
+    })
+}
+
 module.exports = {
     getUser,
     register,
@@ -143,6 +160,7 @@ module.exports = {
     getSong,
     addSong,
     editSong,
-    deleteSong
+    deleteSong,
+    getSingers
 }
 
