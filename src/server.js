@@ -1,6 +1,14 @@
 const express = require('express')
+const cors = require('cors')
 
 const app = express()
+
+app.use(
+    cors({
+        origin: '*',
+    })
+)
+
 const port = process.env.PORT || 3000
 const auth = require('./routes/auth')
 const songs  = require('./routes/songs')
