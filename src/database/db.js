@@ -95,7 +95,7 @@ const getSong = (penyanyi_id, callback) => {
 }
 
 const addSong = (params,penyanyi_id, callback) => {
-    client.query('INSERT INTO songs (Judul, audio_path, penyanyi_id) VALUES ($1, $2, $3) RETURNING *', [params["judul"], params["Audio_path"], penyanyi_id], (err, res) => {
+    client.query('INSERT INTO songs (Judul, audio_path, penyanyi_id) VALUES ($1, $2, $3) RETURNING *', [params["judul"], params["audio_path"], penyanyi_id], (err, res) => {
         if (err) {
             console.log(err.stack)
             callback({message: "Error adding song"})
@@ -106,7 +106,7 @@ const addSong = (params,penyanyi_id, callback) => {
 }
 
 const editSong = (params, penyanyi_id, callback) => {
-    client.query('UPDATE songs SET Judul = $1, audio_path = $2 WHERE penyanyi_id = $3 AND song_id = $4 RETURNING *', [params["judul"], params["Audio_path"], penyanyi_id, params["song_id"]], (err, res) => {
+    client.query('UPDATE songs SET Judul = $1, audio_path = $2 WHERE penyanyi_id = $3 AND song_id = $4 RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["song_id"]], (err, res) => {
         if (err) {
             console.log(err.stack)
             callback({message: "Error editing song"})
