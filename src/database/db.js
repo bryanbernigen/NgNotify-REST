@@ -94,8 +94,8 @@ const getSong = (penyanyi_id, callback) => {
     })
 }
 
-const addSong = (params,penyanyi_id, callback) => {
-    client.query('INSERT INTO songs (Judul, audio_path, penyanyi_id) VALUES ($1, $2, $3) RETURNING *', [params["judul"], params["audio_path"], penyanyi_id], (err, res) => {
+const addSong = (params, penyanyi_id, callback) => {
+    client.query('INSERT INTO songs (Judul, audio_path, penyanyi_id, image_path) VALUES ($1, $2, $3, $4) RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["image_path"]], (err, res) => {
         if (err) {
             console.log(err.stack)
             callback({message: "Error adding song"})

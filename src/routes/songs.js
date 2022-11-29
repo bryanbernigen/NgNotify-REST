@@ -18,7 +18,7 @@ router.get('/',checkLogin(), async (req, res) => {
     }
 )
 
-router.post('/add', [checkLogin(), checkParams(["judul", "audio_path"])], async (req, res) => {
+router.post('/add', [checkLogin(), checkParams(["judul", "audio_path", "image_path"])], async (req, res) => {
         addSong(req.body, req.user.user_id, (result) => {
             if (result.message) {
                 res.status(400).json(result)
