@@ -12,7 +12,18 @@ router.get('/',checkLogin(), async (req, res) => {
             if (result.message) {
                 res.status(400).json(result)
             } else {
-                res.status(200).json({data : result})
+                if (req.query.page == undefined || req.query.page < 1) {
+                    req.query.page = 1
+                }
+                if (req.query.limit == undefined || req.query.limit < 1) {
+                    req.query.limit = 8
+                }
+                
+                let page = req.query.page - 1
+                let limit = req.query.limit
+                let total_pages = Math.ceil(result.length/limit)
+                result = result.slice(page * limit, page * limit + limit)
+                res.status(200).json({data : result, pages:total_pages})
             }
         })
     }
