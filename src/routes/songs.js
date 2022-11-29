@@ -31,7 +31,7 @@ router.post('/add', [checkLogin(), checkParams(["judul", "audio_path", "image_pa
     }
 )
 
-router.post('/edit', [checkLogin(), checkParams(["song_id", "judul", "audio_path"])], async (req, res) => {
+router.post('/edit', [checkLogin(), checkParams(["song_id", "judul", "audio_path", "image_path"])], async (req, res) => {
         editSong(req.body, req.user.user_id, (result) => {
             if (result.message) {
                 res.status(400).json(result)

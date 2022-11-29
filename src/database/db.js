@@ -106,7 +106,7 @@ const addSong = (params, penyanyi_id, callback) => {
 }
 
 const editSong = (params, penyanyi_id, callback) => {
-    client.query('UPDATE songs SET Judul = $1, audio_path = $2 WHERE penyanyi_id = $3 AND song_id = $4 RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["song_id"]], (err, res) => {
+    client.query('UPDATE songs SET Judul = $1, audio_path = $2, image_path = $5 WHERE penyanyi_id = $3 AND song_id = $4 RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["song_id"], params["image_path"]], (err, res) => {
         if (err) {
             console.log(err.stack)
             callback({message: "Error editing song"})
