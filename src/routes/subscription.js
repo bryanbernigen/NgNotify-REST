@@ -121,5 +121,15 @@ router.post('/update', checkLogin(), checkParams(['creator_id', 'subscriber_id',
     }
 })
 
+router.get('/adminemails', async (req, res) => {
+    getAdminEmails((result) => {
+        if (result.message) {
+            res.status(400).json(result)
+        } else {
+            res.status(200).json({data : result})
+        }
+    })
+})
+
 module.exports = router
 

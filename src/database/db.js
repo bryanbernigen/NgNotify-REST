@@ -13,6 +13,22 @@ const credentials = {
 const client = new Client(credentials)
 client.connect()
 
+const getAdminEmails = (callback) => {
+    client.query('SELECT email FROM users WHERE "isAdmin" = true', (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error getting admins"})
+        } else {
+            if (res.rows.length > 0) {
+                callback(res.rows)
+            }
+            else{
+                callback({message: "No admins found"})
+            }
+        }
+    })
+}
+
 // getSongs
 const getUser = (callback) => {
     client.query('SELECT * FROM users', (err, res) => {
@@ -161,6 +177,7 @@ module.exports = {
     addSong,
     editSong,
     deleteSong,
-    getSingers
+    getSingers,
+    getAdminEmails
 }
 
