@@ -3,6 +3,7 @@ const checkLogin = require('../middlewares/checkLogin')
 const checkParams = require('../middlewares/checkParams')
 const fetch = (url, body) => import('node-fetch').then(({default: fetch}) => fetch(url,body));
 const {DOMParser, XMLSerializer} = require('@xmldom/xmldom')
+const {getAdminEmails} = require('../database/db')
 
 let router = express.Router()
 
@@ -51,7 +52,18 @@ router.get('/', checkLogin(), async (req, res) => {
                 status: val[2],
             })
         }
-        res.status(200).json({subsList: subsList})
+        if (req.query.page == undefined || req.query.page < 1) {
+            req.query.page = 1
+        }
+        if (req.query.limit == undefined || req.query.limit < 1) {
+            req.query.limit = 8
+        }
+        
+        let page = req.query.page - 1
+        let limit = req.query.limit
+        let total_pages = Math.ceil(subsList.length/limit)
+        result = subsList.slice(page * limit, page * limit + limit)
+        res.status(200).json({subsList: result, pages: total_pages})
     } catch (error) {
         res.status(500).json({ message : 'Soap Server Error' })
     }
@@ -107,6 +119,16 @@ router.post('/update', checkLogin(), checkParams(['creator_id', 'subscriber_id',
     } catch (error) {
         res.status(500).json({ message : 'Soap Server Error' })
     }
+})
+
+router.get('/adminemails', async (req, res) => {
+    getAdminEmails((result) => {
+        if (result.message) {
+            res.status(400).json(result)
+        } else {
+            res.status(200).json({data : result})
+        }
+    })
 })
 
 module.exports = router
