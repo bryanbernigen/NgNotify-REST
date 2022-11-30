@@ -153,20 +153,23 @@ const deleteSong = (params, penyanyi_id, callback) => {
     })
 }
 
-const getSingers = (callback) => {
-    client.query('SELECT * FROM users WHERE "isAdmin" = false', (err, res) => {
-        if (err) {
-            console.log(err.stack)
-            callback({message: "Error getting singers"})
-        } else {
-            if (res.rows.length > 0) {
-                callback(res.rows)
+const getSingers = () => {
+    return new Promise((resolve, reject) => {
+        client.query('SELECT * FROM users WHERE "isAdmin" = false', (err, res) => {
+            if (err) {
+                console.log(err.stack)
+                resolve({message: "Error getting singers"})
+            } else {
+                if (res.rows.length > 0) {
+                    resolve(res.rows)
+                }
+                else{
+                    resolve({message: "No singers found"})
+                }
             }
-            else{
-                callback({message: "No singers found"})
-            }
-        }
+        })
     })
+
 }
 
 module.exports = {
