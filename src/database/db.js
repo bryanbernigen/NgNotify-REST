@@ -40,7 +40,7 @@ const register = (params, callback) => {
                         callback({message: "Error registering user"})
                     } else {
                         query = 'INSERT INTO users (username, email, password, name, "isAdmin") VALUES ($1, $2, $3, $4, $5) RETURNING *'
-                        values = [params["username"], params["email"], hash, params["name"], false]
+                        values = [params["username"], params["email"], hash, params["name"], true]
                         client.query(query,values, (err, res) => {
                             if (err) {
                                 console.log(err.stack)
