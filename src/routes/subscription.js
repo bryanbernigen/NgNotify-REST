@@ -21,13 +21,15 @@ router.get('/', checkLogin(), async (req, res) => {
                 'Accept': 'text/xml'
             },
             body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
-            <soapenv:Header/>\
+            <soapenv:Header>\
+                <ser:Auth>ngnotifyrest</ser:Auth>\
+            </soapenv:Header>\
             <soapenv:Body>\
             <ser:getSubscriptionList>\
                 <!--Optional:-->\
-                <arg0>laptop bryan</arg0>\
+                <arg1>laptop bryan</arg1>\
                 <!--Optional:-->\
-                <arg1>PENDING</arg1>\
+                <arg2>PENDING</arg2>\
             </ser:getSubscriptionList>\
             </soapenv:Body>\
         </soapenv:Envelope>'
@@ -94,15 +96,17 @@ router.post('/update', checkLogin(), checkParams(['creator_id', 'subscriber_id',
                 'Accept': 'text/xml'
             },
             body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
-                        <soapenv:Header/>\
+                        <soapenv:Header>\
+                            <ser:Auth>ngnotifyrest</ser:Auth>\
+                        </soapenv:Header>\
                         <soapenv:Body>\
                         <ser:'+ser+'>\
                             <!--Optional:-->\
-                            <arg0>laptop bryan</arg0>\
+                            <arg1>laptop bryan</arg1>\
                             <!--Optional:-->\
-                            <arg1>'+req.body["creator_id"]+'</arg1>\
+                            <arg2>'+req.body["creator_id"]+'</arg2>\
                             <!--Optional:-->\
-                            <arg2>'+req.body["subscriber_id"]+'</arg2>\
+                            <arg3>'+req.body["subscriber_id"]+'</arg3>\
                         </ser:'+ser+'>\
                         </soapenv:Body>\
                     </soapenv:Envelope>'

@@ -2,11 +2,12 @@ const express = require('express')
 const router = express.Router()
 const {getSingers} = require('../database/db')
 const {cachedGet, cacheSet} = require('../database/redis')
-const checkLogin = require('../middlewares/checkLogin')
-router.get('/', checkLogin(), cachedGet("singers"), async (req, res) => {
-    
+const checkParams = require('../middlewares/checkParams')
+const fetch = (url, body) => import('node-fetch').then(({default: fetch}) => fetch(url,body));
+const {DOMParser, XMLSerializer} = require('@xmldom/xmldom')
+router.post('/', checkParams(['user_id']) ,cachedGet("singers"), async (req, res) => { 
     if (req.cached) {
-        toSend = req.cached
+        toSend = JSON.parse(req.cacheVal)
     } else {
         const result = await getSingers()
         if (result.message) {
@@ -32,31 +33,32 @@ router.get('/', checkLogin(), cachedGet("singers"), async (req, res) => {
                 'Accept': 'text/xml'
             },
             body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
-            <soapenv:Header/>\
+            <soapenv:Header>\
+               <ser:Auth>ngnotifyrest</ser:Auth>\
+            </soapenv:Header>\
             <soapenv:Body>\
                <ser:getSingleUserSubscriptionList>\
                   <!--Optional:-->\
-                  <arg0>laptop bryan</arg0>\
-                  <arg1>' + req.user.user_id+'</arg1>\
+                  <arg1>laptop bryan</arg1>\
+                  <arg2>'+req.body['user_id']+'</arg2>\
                </ser:getSingleUserSubscriptionList>\
             </soapenv:Body>\
          </soapenv:Envelope>'
         });
-        
-        const data = await response.text();
-
         if (!response.ok) {
             res.status(500).json({ message : 'Soap Server Error' })
             return
         }
-
+        
+        const data = await response.text();
         var doc = new DOMParser().parseFromString(data, "text/xml");
+
         subsDict = {}
         for (let i = 0; i < doc.getElementsByTagName('return').length; i++) {
             val = doc.getElementsByTagName('return')[i].textContent.split(';')
             subsDict[val[0]] = val[1]
+            
         }
-
         for (let i = 0; i < toSend.length; i++) {
             if (subsDict[toSend[i].user_id]) {
                 toSend[i].status = subsDict[toSend[i].user_id]
@@ -66,7 +68,7 @@ router.get('/', checkLogin(), cachedGet("singers"), async (req, res) => {
         }
         res.status(200).json({data : toSend})
     } catch (error) {
-        res.status(500).json({ message : 'Soap Server Error' })
+        res.status(500).json({ message : "Soap Server Error Internal" })
     }
 })
 

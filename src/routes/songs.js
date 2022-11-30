@@ -77,22 +77,24 @@ router.get('/fetch', [checkParams(["penyanyi_id", "user_id"])], async (req, res)
                 'Accept': 'text/xml'
             },
             body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
-                    <soapenv:Header/>\
-                    <soapenv:Body>\
-                    <ser:checkStatus>\
-                        <!--Optional:-->\
-                        <arg0>laptop bryan</arg0>\
-                        <arg1>'+ req.body["penyanyi_id"]+'</arg1>\
-                        <arg2>'+req.body["user_id"]+'</arg2>\
-                    </ser:checkStatus>\
-                    </soapenv:Body>\
-                </soapenv:Envelope>\
+                        <soapenv:Header>\
+                        <ser:Auth>ngnotifyrest</ser:Auth>\
+                        </soapenv:Header>\
+                        <soapenv:Body>\
+                        <ser:checkStatus>\
+                            <!--Optional:-->\
+                            <arg1>laptop bryan</arg1>\
+                            <arg2>'+req.body["penyanyi_id"]+'</arg2>\
+                            <arg3>'+req.body["user_id"]+'</arg3>\
+                        </ser:checkStatus>\
+                        </soapenv:Body>\
+                    </soapenv:Envelope>\
             '
             });
             
             const data = await response.text();
 
-            if (!response.ok) {
+            if (!response.ok) {            
                 res.status(500).json({ message : 'Soap Server Error' })
                 return
             }
@@ -101,7 +103,7 @@ router.get('/fetch', [checkParams(["penyanyi_id", "user_id"])], async (req, res)
                 res.status(500).json({ message : 'Soap Server Error' })
                 return
             }
-        
+
             var doc = new DOMParser().parseFromString(data, "text/xml");
             subbed = doc.getElementsByTagName("return")[0].childNodes[0].nodeValue
             if (subbed == "ACCEPTED") {
@@ -117,7 +119,7 @@ router.get('/fetch', [checkParams(["penyanyi_id", "user_id"])], async (req, res)
                 res.status(500).json({ message : 'Rejected' })
             }
         } catch (error) {
-            res.status(500).json({ message : 'Soap Server Error' })
+            res.status(500).json({ message : error })
         }
     }   
 )
