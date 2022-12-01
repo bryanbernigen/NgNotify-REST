@@ -152,6 +152,11 @@ router.post('/update', checkLogin(), checkParams(['creator_id', 'subscriber_id',
             return
         }
 
+        if (data.includes("fail")){
+            res.status(500).json({ message : 'Soap Server Error' })
+            return
+        }
+
         res.status(200).json({ message : 'Success' })
     } catch (error) {
         res.status(500).json({ message : 'Soap Server Error' })
