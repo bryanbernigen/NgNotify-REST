@@ -40,6 +40,19 @@ const getUser = (callback) => {
     })
 }
 
+const getUserPromise = () => {
+    return new Promise((resolve, reject) => {
+        client.query('SELECT * FROM users', (err, res) => {
+            if (err) {
+                console.log(err.stack)
+                reject(err)
+            } else {
+                resolve(res.rows[0])
+            }
+        })
+    })
+}
+
 const register = (params, callback) => {
     // Query Check if username or email already exists
     client.query('SELECT * FROM users WHERE username = $1 OR email = $2', [params["username"], params["email"]], (err, res) => {
@@ -55,8 +68,8 @@ const register = (params, callback) => {
                         console.log(err)
                         callback({message: "Error registering user"})
                     } else {
-                        query = 'INSERT INTO users (username, email, password, name, "isAdmin") VALUES ($1, $2, $3, $4, $5) RETURNING *'
-                        values = [params["username"], params["email"], hash, params["name"], true]
+                        query = 'INSERT INTO users (username, email, password, name, "isAdmin", image_path) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *'
+                        values = [params["username"], params["email"], hash, params["name"],false, params["image_path"]]
                         client.query(query,values, (err, res) => {
                             if (err) {
                                 console.log(err.stack)
@@ -181,10 +194,10 @@ const checkUniqueEmail = (email, callback) => {
             callback({message: "Error checking email"})
         } else {
             if (res.rows.length > 0) {
-                callback({status:"false",message: "Email already exists"})
+                callback({status:"false"})
             }
             else{
-                callback({status:"true",message: "Email is unique"})
+                callback({status:"true"})
             }
         }
     })
@@ -197,10 +210,10 @@ const checkUniqueUsername = (username, callback) => {
             callback({message: "Error checking username"})
         } else {
             if (res.rows.length > 0) {
-                callback({status:"false",message: "Username already exists"})
+                callback({status:"false"})
             }
             else{
-                callback({status:"true",message: "Username is unique"})
+                callback({status:"true"})
             }
         }
     })
@@ -226,6 +239,7 @@ const getPremiumSongs = (callback) => {
 
 module.exports = {
     getUser,
+    getUserPromise,
     register,
     login,
     getSong,

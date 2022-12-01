@@ -24,7 +24,7 @@ router.post('/login',checkParams(["emailuser", "password"]),(req, res) => {
     })
 })
 
-router.post('/register', checkParams(["email", "password", "username", "name"]),(req, res, next) => {
+router.post('/register', checkParams(["email", "password", "username", "name", "image_path"]),(req, res, next) => {
     register(req.body, (result) => {
         if (result.message) {
             res.status(400).json(result)

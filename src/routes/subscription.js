@@ -3,16 +3,16 @@ const checkLogin = require('../middlewares/checkLogin')
 const checkParams = require('../middlewares/checkParams')
 const fetch = (url, body) => import('node-fetch').then(({default: fetch}) => fetch(url,body));
 const {DOMParser, XMLSerializer} = require('@xmldom/xmldom')
-const {getAdminEmails} = require('../database/db')
+const {getAdminEmails, getUserPromise} = require('../database/db')
 
 let router = express.Router()
 
 router.get('/', checkLogin(), async (req, res) => {
     // fetch from localhost:8080/webservice/ngnotify
-    if (req.user.isAdmin !== true){
-        res.status(403).send('You are not allowed to do this')
-        return
-    }
+    // if (req.user.isAdmin !== true){
+    //     res.status(403).send('You are not allowed to do this')
+    //     return
+    // }
     try {
         const response = await fetch('http://localhost:8070/webservice/ngnotify', {
             method: 'POST',
@@ -60,6 +60,9 @@ router.get('/', checkLogin(), async (req, res) => {
         if (req.query.limit == undefined || req.query.limit < 1) {
             req.query.limit = 8
         }
+
+        const users = await getUserPromise(subsList.map(sub => sub.subscriber_id))
+        // TODO: get user info from database
         
         let page = req.query.page - 1
         let limit = req.query.limit
@@ -67,7 +70,7 @@ router.get('/', checkLogin(), async (req, res) => {
         result = subsList.slice(page * limit, page * limit + limit)
         res.status(200).json({subsList: result, pages: total_pages})
     } catch (error) {
-        res.status(500).json({ message : 'Soap Server Error' })
+        res.status(500).json({ message : 'Internal Server Error' })
     }
 })
 
@@ -134,6 +137,43 @@ router.get('/adminemails', async (req, res) => {
         }
     })
 })
+
+router.post('/subscribe', checkParams(["id", "current_user"]),async (req, res) => {
+    const response = await fetch('http://localhost:8070/webservice/ngnotify', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'Accept': 'text/xml'
+            },
+            body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
+                        <soapenv:Header>\
+                            <ser:Auth>ngnotifyvanilla</ser:Auth>\
+                        </soapenv:Header>\
+                        <soapenv:Body>\
+                            <ser:newSubscription>\
+                                <!--Optional:-->\
+                                <arg1>laptop bryan</arg1>\
+                                <arg2>'+req.body["id"]+'</arg2>\
+                                <arg3>'+req.body["current_user"]+'</arg3>\
+                                <!--Optional:-->\
+                                <arg4>image_path</arg4>\
+                            </ser:newSubscription>\
+                        </soapenv:Body>\
+                    </soapenv:Envelope>'
+        });
+
+        const data = await response.text();
+
+        if (!response.ok) {
+            res.status(500).json({ message : 'Soap Server Error' })
+            return
+        }
+
+        res.status(200).json({ message : 'Success' })
+    } 
+)
+    
+
 
 module.exports = router
 

@@ -57,7 +57,6 @@ router.post('/', checkParams(['user_id']) ,cachedGet("singers"), async (req, res
         for (let i = 0; i < doc.getElementsByTagName('return').length; i++) {
             val = doc.getElementsByTagName('return')[i].textContent.split(';')
             subsDict[val[0]] = val[1]
-            
         }
         for (let i = 0; i < toSend.length; i++) {
             if (subsDict[toSend[i].user_id]) {

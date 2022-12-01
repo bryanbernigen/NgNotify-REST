@@ -7,8 +7,8 @@ const {DOMParser, XMLSerializer} = require('@xmldom/xmldom')
 
 let router = express.Router()
 
-router.get('/',checkLogin(), async (req, res) => {
-        getSong(req.user.user_id, (result) => {
+router.get('/',async (req, res) => {
+        getSong(req.query["penyanyi_id"], (result) => {
             if (result.message) {
                 res.status(400).json(result)
             } else {
@@ -68,7 +68,7 @@ router.post('/delete', [checkLogin(), checkParams(["song_id"])], async (req, res
     }
 )
 
-router.get('/fetch', [checkParams(["penyanyi_id", "user_id"])], async (req, res) => {
+router.post('/fetch', [checkParams(["penyanyi_id", "user_id"])], async (req, res) => {
         try {
             const response = await fetch('http://localhost:8070/webservice/ngnotify', {
             method: 'POST',
