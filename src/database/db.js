@@ -206,6 +206,24 @@ const checkUniqueUsername = (username, callback) => {
     })
 }
 
+const getPremiumSongs = (callback) => {
+    return new Promise((resolve, reject) => {
+        client.query('select penyanyi_id, song_id, judul, name AS penyanyi, duration, audio_path, s.image_path from songs s JOIN users u ON s.penyanyi_id = u.user_id', (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            resolve({message: "Error getting premium songs"})
+        } else {
+            if (res.rows.length > 0) {
+                resolve(res.rows)
+            }
+            else{
+                resolve({message: "No premium songs found"})
+            }
+        }
+    })
+    })
+}
+
 module.exports = {
     getUser,
     register,
@@ -217,6 +235,7 @@ module.exports = {
     getSingers,
     getAdminEmails,
     checkUniqueEmail,
-    checkUniqueUsername
+    checkUniqueUsername,
+    getPremiumSongs
 }
 
