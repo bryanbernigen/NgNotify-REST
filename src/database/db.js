@@ -111,14 +111,16 @@ const getSong = (penyanyi_id, callback) => {
 }
 
 const addSong = (params, penyanyi_id, callback) => {
-    client.query('INSERT INTO songs (Judul, audio_path, penyanyi_id, image_path) VALUES ($1, $2, $3, $4) RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["image_path"]], (err, res) => {
-        if (err) {
-            console.log(err.stack)
-            callback({message: "Error adding song"})
-        } else {
-            callback(res.rows[0])
-        }
-    })
+    const getSong = (penyanyi_id, callback) => {
+        client.query('SELECT * FROM songs WHERE penyanyi_id = $1', [penyanyi_id], (err, res) => {
+            if (err) {
+                console.log(err.stack)
+                callback({message: "Error getting song"})
+            } else {
+                callback(res.rows)
+            }
+        })
+    }
 }
 
 const editSong = (params, penyanyi_id, callback) => {
@@ -172,6 +174,38 @@ const getSingers = () => {
 
 }
 
+const checkUniqueEmail = (email, callback) => {
+    client.query("SELECT * FROM users WHERE email = $1", [email], (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error checking email"})
+        } else {
+            if (res.rows.length > 0) {
+                callback({status:"false",message: "Email already exists"})
+            }
+            else{
+                callback({status:"true",message: "Email is unique"})
+            }
+        }
+    })
+}
+
+const checkUniqueUsername = (username, callback) => {
+    client.query("SELECT * FROM users WHERE username = $1", [username], (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error checking username"})
+        } else {
+            if (res.rows.length > 0) {
+                callback({status:"false",message: "Username already exists"})
+            }
+            else{
+                callback({status:"true",message: "Username is unique"})
+            }
+        }
+    })
+}
+
 module.exports = {
     getUser,
     register,
@@ -181,6 +215,8 @@ module.exports = {
     editSong,
     deleteSong,
     getSingers,
-    getAdminEmails
+    getAdminEmails,
+    checkUniqueEmail,
+    checkUniqueUsername
 }
 

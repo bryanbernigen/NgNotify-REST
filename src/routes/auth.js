@@ -1,6 +1,6 @@
 require('dotenv').config({path: process.cwd()+"/.env"})
 const checkParams = require('../middlewares/checkParams')
-const {register, login} = require('../database/db')
+const {register, login, checkUniqueEmail, checkUniqueUsername} = require('../database/db')
 const {cacheDelete} = require('../database/redis')
 const express = require('express')
 let router = express.Router()
@@ -34,4 +34,25 @@ router.post('/register', checkParams(["email", "password", "username", "name"]),
         }
     }
 )})
+
+router.post('/uniqueemail', checkParams(["email"]), (req, res) => {
+    checkUniqueEmail(req.body["email"], (result) => {
+        if (result.message) {
+            res.status(400).json(result)
+        } else {
+            res.status(200).json(result)
+        }
+    })
+})
+
+router.post('/uniqueusername', checkParams(["username"]), (req, res) => {
+    checkUniqueUsername(req.body["username"], (result) => {
+        if (result.message) {
+            res.status(400).json(result)
+        } else {
+            res.status(200).json(result)
+        }
+    })
+})
+
 module.exports = router;
