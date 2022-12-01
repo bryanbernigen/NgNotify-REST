@@ -29,7 +29,7 @@ router.get('/',async (req, res) => {
     }
 )
 
-router.post('/add', [checkLogin(), checkParams(["judul", "audio_path", "image_path"])], async (req, res) => {
+router.post('/add', [checkLogin(), checkParams(["judul", "audio_path", "image_path", "duration"])], async (req, res) => {
         addSong(req.body, req.user.user_id, (result) => {
             if (result.message) {
                 res.status(400).json(result)
@@ -42,7 +42,7 @@ router.post('/add', [checkLogin(), checkParams(["judul", "audio_path", "image_pa
     }
 )
 
-router.post('/edit', [checkLogin(), checkParams(["song_id", "judul", "audio_path", "image_path"])], async (req, res) => {
+router.post('/edit', [checkLogin(), checkParams(["song_id", "judul", "audio_path", "image_path", "duration"])], async (req, res) => {
         editSong(req.body, req.user.user_id, (result) => {
             if (result.message) {
                 res.status(400).json(result)

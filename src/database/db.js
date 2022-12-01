@@ -1,6 +1,7 @@
 const { Client } = require('pg')
 const dotenv = require('dotenv').config({path: process.cwd()+"/.env"})
 const bcrypt = require('bcrypt')
+const fetch = (url, body) => import('node-fetch').then(({default: fetch}) => fetch(url,body));
 
 const credentials = {
     user: process.env.DB_USER,
@@ -40,16 +41,30 @@ const getUser = (callback) => {
     })
 }
 
-const getUserPromise = () => {
+const getSingerPromise = () => {
     return new Promise((resolve, reject) => {
-        client.query('SELECT * FROM users', (err, res) => {
+        client.query('SELECT * FROM users WHERE "isAdmin" = False', (err, res) => {
             if (err) {
                 console.log(err.stack)
                 reject(err)
             } else {
-                resolve(res.rows[0])
+                resolve(res.rows)
             }
         })
+    })
+}
+
+const getUserPromise = () => {
+    return new Promise(async (resolve, reject) => {
+        //fetch from localhost:8000/users
+        try {
+            const response = await fetch('http://localhost:8000/api/userapi/showalluser')
+            const data = await response.json()
+            resolve(data)
+        }
+        catch (err) {
+            reject(err)
+        }
     })
 }
 
@@ -113,7 +128,7 @@ const login = (params, callback) => {
 }
 
 const getSong = (penyanyi_id, callback) => {
-    client.query('SELECT * FROM songs WHERE penyanyi_id = $1', [penyanyi_id], (err, res) => {
+    client.query('select penyanyi_id, song_id, judul, name AS penyanyi, duration, audio_path, s.image_path from songs s JOIN users u ON s.penyanyi_id = u.user_id WHERE penyanyi_id = $1 ', [penyanyi_id], (err, res) => {
         if (err) {
             console.log(err.stack)
             callback({message: "Error getting song"})
@@ -124,20 +139,19 @@ const getSong = (penyanyi_id, callback) => {
 }
 
 const addSong = (params, penyanyi_id, callback) => {
-    const getSong = (penyanyi_id, callback) => {
-        client.query('SELECT * FROM songs WHERE penyanyi_id = $1', [penyanyi_id], (err, res) => {
-            if (err) {
-                console.log(err.stack)
-                callback({message: "Error getting song"})
-            } else {
-                callback(res.rows)
-            }
-        })
-    }
+    client.query('INSERT INTO songs (judul, audio_path, penyanyi_id, image_path, duration) VALUES ($1, $2, $3, $4, $5) RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["image_path"], params["duration"]], (err, res) => {
+        if (err) {
+            console.log(err.stack)
+            callback({message: "Error adding song"})
+        } else {
+            callback(res.rows[0])
+        }
+    })
 }
 
+
 const editSong = (params, penyanyi_id, callback) => {
-    client.query('UPDATE songs SET Judul = $1, audio_path = $2, image_path = $5 WHERE penyanyi_id = $3 AND song_id = $4 RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["song_id"], params["image_path"]], (err, res) => {
+    client.query('UPDATE songs SET Judul = $1, audio_path = $2, image_path = $5, duration = $6 WHERE penyanyi_id = $3 AND song_id = $4 RETURNING *', [params["judul"], params["audio_path"], penyanyi_id, params["song_id"], params["image_path"], params["duration"]], (err, res) => {
         if (err) {
             console.log(err.stack)
             callback({message: "Error editing song"})
@@ -239,6 +253,7 @@ const getPremiumSongs = (callback) => {
 
 module.exports = {
     getUser,
+    getSingerPromise,
     getUserPromise,
     register,
     login,

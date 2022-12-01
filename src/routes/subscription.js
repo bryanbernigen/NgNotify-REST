@@ -3,9 +3,13 @@ const checkLogin = require('../middlewares/checkLogin')
 const checkParams = require('../middlewares/checkParams')
 const fetch = (url, body) => import('node-fetch').then(({default: fetch}) => fetch(url,body));
 const {DOMParser, XMLSerializer} = require('@xmldom/xmldom')
-const {getAdminEmails, getUserPromise} = require('../database/db')
+const {getAdminEmails, getSingerPromise, getUserPromise} = require('../database/db')
 
 let router = express.Router()
+router.get('/test', async (req, res) => {
+    const result = await getUserPromise()
+    res.json(result["data"])
+})
 
 router.get('/', checkLogin(), async (req, res) => {
     // fetch from localhost:8080/webservice/ngnotify
@@ -42,8 +46,6 @@ router.get('/', checkLogin(), async (req, res) => {
             return
         }
 
-        
-
         var doc = new DOMParser().parseFromString(data, "text/xml");
         subsList = []
         for (let i = 0; i < doc.getElementsByTagName('return').length; i++) {
@@ -61,9 +63,37 @@ router.get('/', checkLogin(), async (req, res) => {
             req.query.limit = 8
         }
 
-        const users = await getUserPromise(subsList.map(sub => sub.subscriber_id))
+        const singers = await getSingerPromise()
+        const users = await getUserPromise()
+
         // TODO: get user info from database
-        
+        singerDict = {}
+        singers.forEach(singer => {
+            singerDict[singer.user_id] = singer
+        })
+
+        usersData = users["data"]
+        usersDict = {}
+        usersData.forEach(user => {
+            usersDict[user.user_id] = user
+        })
+
+        for (let i = 0; i < subsList.length; i++) {
+            if (singerDict[subsList[i].creator_id] == undefined) {
+                subsList[i].nama_penyanyi = undefined
+            } else {
+                subsList[i].nama_penyanyi = singerDict[subsList[i].creator_id].name
+            }
+
+            if (usersDict[subsList[i].subscriber_id] == undefined) {
+                subsList[i].nama_subscriber = undefined
+            }
+            else {
+                subsList[i].nama_subscriber = usersDict[subsList[i].subscriber_id].username
+            }
+        }
+        subsList = subsList.filter(subs => subs.nama_penyanyi != undefined)
+
         let page = req.query.page - 1
         let limit = req.query.limit
         let total_pages = Math.ceil(subsList.length/limit)
