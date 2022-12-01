@@ -130,7 +130,7 @@ router.post('/update', checkLogin(), checkParams(['creator_id', 'subscriber_id',
             },
             body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
                         <soapenv:Header>\
-                            <ser:Auth>ngnotifyrest</ser:Auth>\
+                        <ser:Auth>' +process.env.SOAP_KEY+'</ser:Auth>\
                         </soapenv:Header>\
                         <soapenv:Body>\
                         <ser:'+ser+'>\
@@ -182,7 +182,7 @@ router.post('/subscribe', checkParams(["id", "current_user"]),async (req, res) =
             },
             body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
                         <soapenv:Header>\
-                            <ser:Auth>ngnotifyvanilla</ser:Auth>\
+                        <ser:Auth>' +process.env.SOAP_KEY+'</ser:Auth>\
                         </soapenv:Header>\
                         <soapenv:Body>\
                             <ser:newSubscription>\

@@ -5,6 +5,7 @@ const {cachedGet, cacheSet} = require('../database/redis')
 const checkParams = require('../middlewares/checkParams')
 const fetch = (url, body) => import('node-fetch').then(({default: fetch}) => fetch(url,body));
 const {DOMParser, XMLSerializer} = require('@xmldom/xmldom')
+const dotenv = require('dotenv').config({path: process.cwd()+"/.env"})
 router.post('/', checkParams(['user_id']) ,cachedGet("singers"), async (req, res) => { 
     if (req.cached) {
         toSend = JSON.parse(req.cacheVal)
@@ -34,7 +35,7 @@ router.post('/', checkParams(['user_id']) ,cachedGet("singers"), async (req, res
             },
             body: '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://services.ngnotify/">\
             <soapenv:Header>\
-               <ser:Auth>ngnotifyrest</ser:Auth>\
+               <ser:Auth>' +process.env.SOAP_KEY+'</ser:Auth>\
             </soapenv:Header>\
             <soapenv:Body>\
                <ser:getSingleUserSubscriptionList>\
@@ -66,6 +67,8 @@ router.post('/', checkParams(['user_id']) ,cachedGet("singers"), async (req, res
                 toSend[i].status = null
             }
         }
+        // Stale while revalidate
+        res.set('Cache-Control', 'max-age=10, stale-while-revalidate=50')
         res.status(200).json({data : toSend})
     } catch (error) {
         res.status(500).json({ message : "Soap Server Error Internal" })

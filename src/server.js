@@ -10,6 +10,7 @@ app.use(
 )
 
 const port = process.env.PORT || 3000
+const host = process.env.HOST || '0.0.0.0'
 const auth = require('./routes/auth')
 const songs  = require('./routes/songs')
 const subscription = require('./routes/subscription')
@@ -26,4 +27,4 @@ app.use("/singers", singer)
 app.use("/user", user)
 app.get('/', checkLogin(), (req, res) => res.send('Hello World!'))
 
-app.listen(port, () => console.log(`App listening on port ${port}!`))
+app.listen(port, host ,() => console.log(`App listening on port ${port}!`))
